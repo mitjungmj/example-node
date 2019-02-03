@@ -21,6 +21,7 @@ jobs:
     docker:
       - image: circleci/node:8.11.1-stretch
     steps:
+      - checkout
       #add-on
       - run: npm test
       - setup_remote_docker
@@ -29,6 +30,7 @@ jobs:
     docker:
       - image: circleci/node:8.11.1-stretch
     steps:
+      - checkout
       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - run: 
           name: "Build docker image and push to docker hub"
