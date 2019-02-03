@@ -16,10 +16,18 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
+  test:
+    docker:
+      - image: circleci/node:8.11.1-stretch
+    steps:
       #add-on
       - run: npm test
       - setup_remote_docker
+
+  ship:
+    docker:
+      - image: circleci/node:8.11.1-stretch
+    steps:
       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - run: 
           name: "Build docker image and push to docker hub"
@@ -48,4 +56,24 @@ jobs:
                 --batch_size 5 --start_first \
                 --auto_complete --timeout 600 
       - run: echo Done
+    workflow:
+      version: 2
+      build_test_ship_deploy:
+        jobs: 
+          - build
+          - test:
+              requires:
+                - build
+          -  ship:
+              requires:
+                - build
+                - test
+          - deploy:
+              type: approval
+              requires:
+                - build
+                - test
+                - ship
+
+
 
