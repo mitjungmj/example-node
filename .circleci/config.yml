@@ -6,6 +6,12 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+
+  test:
+    docker:
+      - image: circleci/node:8.11.1-stretch
+    steps:
+      - checkout
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
@@ -16,21 +22,15 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
-  test:
-    docker:
-      - image: circleci/node:8.11.1-stretch
-    steps:
-      - checkout
       #add-on
       - run: npm test
-      - setup_remote_docker
 
   ship:
     docker:
       - image: circleci/node:8.11.1-stretch
     steps:
       - checkout
+      - setup_remote_docker
       - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - run: 
           name: "Build docker image and push to docker hub"
